@@ -1,16 +1,20 @@
 import { Message, OpenAIModel, OpenAIModelID } from "@/types";
-import { IconPlayerStop, IconSend } from "@tabler/icons-react";
-import { FC, KeyboardEvent, MutableRefObject, useEffect, useRef, useState } from "react";
+import { IconPlayerStop, IconRepeat, IconSend } from "@tabler/icons-react";
+import { FC, KeyboardEvent, MutableRefObject, useEffect, useState } from "react";
+import { useTranslation } from "next-i18next";
 
 interface Props {
   messageIsStreaming: boolean;
-  onSend: (message: Message) => void;
   model: OpenAIModel;
+  messages: Message[];
+  onSend: (message: Message) => void;
+  onRegenerate: () => void;
   stopConversationRef: MutableRefObject<boolean>;
   textareaRef: MutableRefObject<HTMLTextAreaElement | null>;
 }
 
-export const ChatInput: FC<Props> = ({ onSend, messageIsStreaming, model, stopConversationRef, textareaRef }) => {
+export const ChatInput: FC<Props> = ({ messageIsStreaming, model, messages, onSend, onRegenerate, stopConversationRef, textareaRef }) => {
+  const { t } = useTranslation('chat');
   const [content, setContent] = useState<string>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
 
@@ -19,7 +23,7 @@ export const ChatInput: FC<Props> = ({ onSend, messageIsStreaming, model, stopCo
     const maxLength = model.id === OpenAIModelID.GPT_3_5 ? 12000 : 24000;
 
     if (value.length > maxLength) {
-      alert(`Message limit is ${maxLength} characters`);
+      alert(t(`Message limit is {{maxLength}} characters. You have entered {{valueLength}} characters.`, { maxLength, valueLength: value.length }));
       return;
     }
 
@@ -32,7 +36,7 @@ export const ChatInput: FC<Props> = ({ onSend, messageIsStreaming, model, stopCo
     }
 
     if (!content) {
-      alert("Please enter a message");
+      alert(t("Please enter a message"));
       return;
     }
 
@@ -67,7 +71,6 @@ export const ChatInput: FC<Props> = ({ onSend, messageIsStreaming, model, stopCo
     }
   }, [content]);
 
-
   function handleStopConversation() {
     stopConversationRef.current = true;
     setTimeout(() => {
@@ -87,9 +90,23 @@ export const ChatInput: FC<Props> = ({ onSend, messageIsStreaming, model, stopCo
               size={16}
               className="inline-block mb-[2px]"
             />{" "}
-            Stop Generating
+            {t('Stop Generating')}
           </button>
         )}
+
+        {!messageIsStreaming && messages.length > 0 && (
+          <button
+            className="absolute -top-2 md:top-0 left-0 right-0 mx-auto dark:bg-[#343541] border w-fit border-gray-500 py-2 px-4 rounded text-black dark:text-white hover:opacity-50"
+            onClick={onRegenerate}
+          >
+            <IconRepeat
+              size={16}
+              className="inline-block mb-[2px]"
+            />{" "}
+            {t("Regenerate response")}
+          </button>
+        )}
+
         <div className="flex flex-col w-full py-2 flex-grow md:py-3 md:pl-4 relative border border-black/10 bg-white dark:border-gray-900/50 dark:text-white dark:bg-[#40414F] rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]">
           <textarea
             ref={textareaRef}
@@ -100,7 +117,7 @@ export const ChatInput: FC<Props> = ({ onSend, messageIsStreaming, model, stopCo
               maxHeight: "400px",
               overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400 ? "auto" : "hidden"}`
             }}
-            placeholder="Type a message..."
+            placeholder={t("Type a message...") || ''}
             value={content}
             rows={1}
             onCompositionStart={() => setIsTyping(true)}
@@ -129,7 +146,7 @@ export const ChatInput: FC<Props> = ({ onSend, messageIsStreaming, model, stopCo
         >
           ChatBot UI
         </a>
-        . Chatbot UI is an advanced chatbot kit for OpenAI&apos;s chat models aiming to mimic ChatGPT&apos;s interface and functionality.
+        . {t("Chatbot UI is an advanced chatbot kit for OpenAI's chat models aiming to mimic ChatGPT's interface and functionality.")}
       </div>
     </div>
   );

@@ -1,17 +1,26 @@
 import { Chat } from "@/components/Chat/Chat";
 import { Navbar } from "@/components/Mobile/Navbar";
 import { Sidebar } from "@/components/Sidebar/Sidebar";
-import { ChatBody, ChatFolder, Conversation, KeyValuePair, Message, OpenAIModel, OpenAIModelID, OpenAIModels } from "@/types";
+import { ChatBody, ChatFolder, Conversation, ErrorMessage, KeyValuePair, Message, OpenAIModel, OpenAIModelID, OpenAIModels } from "@/types";
 import { cleanConversationHistory, cleanSelectedConversation } from "@/utils/app/clean";
 import { DEFAULT_SYSTEM_PROMPT } from "@/utils/app/const";
 import { saveConversation, saveConversations, updateConversation } from "@/utils/app/conversation";
 import { saveFolders } from "@/utils/app/folders";
 import { exportData, importData } from "@/utils/app/importExport";
 import { IconArrowBarLeft, IconArrowBarRight } from "@tabler/icons-react";
+import { GetServerSideProps } from "next";
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useTranslation } from "next-i18next";
 
-export default function Home() {
+interface HomeProps {
+  serverSideApiKeyIsSet: boolean;
+}
+
+
+const Home: React.FC<HomeProps> = ({ serverSideApiKeyIsSet }) => {
+  const { t } = useTranslation('chat')
   const [folders, setFolders] = useState<ChatFolder[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation>();
@@ -22,18 +31,20 @@ export default function Home() {
   const [showSidebar, setShowSidebar] = useState<boolean>(true);
   const [apiKey, setApiKey] = useState<string>("");
   const [messageError, setMessageError] = useState<boolean>(false);
-  const [modelError, setModelError] = useState<boolean>(false);
-  const [isUsingEnv, setIsUsingEnv] = useState<boolean>(false);
+  const [modelError, setModelError] = useState<ErrorMessage | null>(null);
+  const [currentMessage, setCurrentMessage] = useState<Message>();
 
   const stopConversationRef = useRef<boolean>(false);
 
-  const handleSend = async (message: Message, isResend: boolean) => {
+  const handleSend = async (message: Message, deleteCount = 0) => {
     if (selectedConversation) {
       let updatedConversation: Conversation;
 
-      if (isResend) {
+      if (deleteCount) {
         const updatedMessages = [...selectedConversation.messages];
-        updatedMessages.pop();
+        for (let i = 0; i < deleteCount; i++) {
+          updatedMessages.pop();
+        }
 
         updatedConversation = {
           ...selectedConversation,
@@ -169,6 +180,15 @@ export default function Home() {
   };
 
   const fetchModels = async (key: string) => {
+    const error = {
+      title: t('Error fetching models.'),
+      code: null,
+      messageLines: [
+        t('Make sure your OpenAI API key is set in the bottom left of the sidebar.'),
+        t('If you completed this step, OpenAI may be experiencing issues.')
+      ]
+    } as ErrorMessage;
+
     const response = await fetch("/api/models", {
       method: "POST",
       headers: {
@@ -180,19 +200,26 @@ export default function Home() {
     });
 
     if (!response.ok) {
-      setModelError(true);
+      try {
+        const data = await response.json();
+        Object.assign(error, {
+          code: data.error?.code,
+          messageLines: [data.error?.message]
+        })
+      } catch (e) { }
+      setModelError(error);
       return;
     }
 
     const data = await response.json();
 
     if (!data) {
-      setModelError(true);
+      setModelError(error);
       return;
     }
 
     setModels(data);
-    setModelError(false);
+    setModelError(null);
   };
 
   const handleLightMode = (mode: "dark" | "light") => {
@@ -203,11 +230,6 @@ export default function Home() {
   const handleApiKeyChange = (apiKey: string) => {
     setApiKey(apiKey);
     localStorage.setItem("apiKey", apiKey);
-  };
-
-  const handleEnvChange = (isUsingEnv: boolean) => {
-    setIsUsingEnv(isUsingEnv);
-    localStorage.setItem("isUsingEnv", isUsingEnv.toString());
   };
 
   const handleExportData = () => {
@@ -280,7 +302,7 @@ export default function Home() {
 
     const newConversation: Conversation = {
       id: lastConversation ? lastConversation.id + 1 : 1,
-      name: `Conversation ${lastConversation ? lastConversation.id + 1 : 1}`,
+      name: `${t('Conversation')} ${lastConversation ? lastConversation.id + 1 : 1}`,
       messages: [],
       model: OpenAIModels[OpenAIModelID.GPT_3_5],
       prompt: DEFAULT_SYSTEM_PROMPT,
@@ -347,10 +369,38 @@ export default function Home() {
 
     setFolders([]);
     localStorage.removeItem("folders");
-
-    setIsUsingEnv(false);
-    localStorage.removeItem("isUsingEnv");
   };
+
+  const handleEditMessage = (message: Message, messageIndex: number) => {
+    if (selectedConversation) {
+      const updatedMessages = selectedConversation.messages
+        .map((m, i) => {
+          if (i < messageIndex) {
+            return m;
+          }
+        })
+        .filter((m) => m) as Message[];
+
+      const updatedConversation = {
+        ...selectedConversation,
+        messages: updatedMessages
+      };
+
+      const { single, all } = updateConversation(updatedConversation, conversations);
+
+      setSelectedConversation(single);
+      setConversations(all);
+
+      setCurrentMessage(message);
+    }
+  };
+
+  useEffect(() => {
+    if (currentMessage) {
+      handleSend(currentMessage);
+      setCurrentMessage(undefined);
+    }
+  }, [currentMessage]);
 
   useEffect(() => {
     if (window.innerWidth < 640) {
@@ -374,11 +424,7 @@ export default function Home() {
     if (apiKey) {
       setApiKey(apiKey);
       fetchModels(apiKey);
-    }
-
-    const usingEnv = localStorage.getItem("isUsingEnv");
-    if (usingEnv) {
-      setIsUsingEnv(usingEnv === "true");
+    } else if (serverSideApiKeyIsSet) {
       fetchModels("");
     }
 
@@ -413,7 +459,7 @@ export default function Home() {
         folderId: 0
       });
     }
-  }, []);
+  }, [serverSideApiKeyIsSet]);
 
   return (
     <>
@@ -441,9 +487,9 @@ export default function Home() {
             />
           </div>
 
-          <article className="flex h-full w-full pt-[48px] sm:pt-0">
+          <div className="flex h-full w-full pt-[48px] sm:pt-0">
             {showSidebar ? (
-              <>
+              <div>
                 <Sidebar
                   loading={messageIsStreaming}
                   conversations={conversations}
@@ -467,13 +513,18 @@ export default function Home() {
                 />
 
                 <IconArrowBarLeft
-                  className="fixed top-2.5 left-4 sm:top-1 sm:left-4 sm:text-neutral-700 dark:text-white cursor-pointer hover:text-gray-400 dark:hover:text-gray-300 h-7 w-7 sm:h-8 sm:w-8 sm:hidden"
+                  className="z-50 fixed top-5 left-[270px] sm:top-0.5 sm:left-[270px] sm:text-neutral-700 dark:text-white cursor-pointer hover:text-gray-400 dark:hover:text-gray-300 h-7 w-7 sm:h-8 sm:w-8"
                   onClick={() => setShowSidebar(!showSidebar)}
                 />
-              </>
+
+                <div
+                  onClick={() => setShowSidebar(!showSidebar)}
+                  className="sm:hidden bg-black opacity-70 z-10 absolute top-0 left-0 h-full w-full"
+                ></div>
+              </div>
             ) : (
               <IconArrowBarRight
-                className="fixed text-white z-50 top-2.5 left-4 sm:top-1.5 sm:left-4 sm:text-neutral-700 dark:text-white cursor-pointer hover:text-gray-400 dark:hover:text-gray-300 h-7 w-7 sm:h-8 sm:w-8"
+                className="fixed text-white z-50 top-2.5 left-4 sm:top-0.5 sm:left-4 sm:text-neutral-700 dark:text-white cursor-pointer hover:text-gray-400 dark:hover:text-gray-300 h-7 w-7 sm:h-8 sm:w-8"
                 onClick={() => setShowSidebar(!showSidebar)}
               />
             )}
@@ -482,7 +533,7 @@ export default function Home() {
               conversation={selectedConversation}
               messageIsStreaming={messageIsStreaming}
               apiKey={apiKey}
-              isUsingEnv={isUsingEnv}
+              serverSideApiKeyIsSet={serverSideApiKeyIsSet}
               modelError={modelError}
               messageError={messageError}
               models={models}
@@ -490,12 +541,27 @@ export default function Home() {
               lightMode={lightMode}
               onSend={handleSend}
               onUpdateConversation={handleUpdateConversation}
-              onAcceptEnv={handleEnvChange}
+              onEditMessage={handleEditMessage}
               stopConversationRef={stopConversationRef}
             />
-          </article>
+          </div>
         </main>
       )}
     </>
   );
-}
+};
+export default Home;
+
+export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
+  return {
+    props: {
+      serverSideApiKeyIsSet: !!process.env.OPENAI_API_KEY,
+      ...(await serverSideTranslations(locale ?? 'en', [
+        'common',
+        'chat',
+        'sidebar',
+        'markdown',
+      ])),
+    }
+  };
+};

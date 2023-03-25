@@ -1,6 +1,7 @@
 import { ChatFolder, Conversation, KeyValuePair } from "@/types";
 import { IconArrowBarLeft, IconFolderPlus, IconPlus } from "@tabler/icons-react";
 import { FC, useEffect, useState } from "react";
+import { useTranslation } from "next-i18next";
 import { Conversations } from "./Conversations";
 import { Folders } from "./Folders";
 import { Search } from "./Search";
@@ -29,6 +30,8 @@ interface Props {
 }
 
 export const Sidebar: FC<Props> = ({ loading, conversations, lightMode, selectedConversation, apiKey, folders, onCreateFolder, onDeleteFolder, onUpdateFolder, onNewConversation, onToggleLightMode, onSelectConversation, onDeleteConversation, onToggleSidebar, onUpdateConversation, onApiKeyChange, onClearConversations, onExportConversations, onImportConversations }) => {
+
+  const { t } = useTranslation('sidebar');
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredConversations, setFilteredConversations] = useState<Conversation[]>(conversations);
 
@@ -77,7 +80,7 @@ export const Sidebar: FC<Props> = ({ loading, conversations, lightMode, selected
   }, [searchTerm, conversations]);
 
   return (
-    <aside className={`h-full flex flex-none space-y-2 p-2 flex-col bg-[#202123] w-[260px] z-10 sm:relative sm:top-0 absolute top-12 bottom-0`}>
+    <aside className={`h-full transition-all flex flex-none space-y-2 p-2 flex-col bg-[#202123] w-[260px] z-50 sm:relative sm:top-0 fixed top-0 bottom-0`}>
       <header className="flex items-center">
         <button
           className="flex gap-3 p-3 items-center w-[190px] rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white cursor-pointer text-sm flex-shrink-0 border border-white/20"
@@ -87,12 +90,12 @@ export const Sidebar: FC<Props> = ({ loading, conversations, lightMode, selected
           }}
         >
           <IconPlus size={16} />
-          New chat
+          {t('New chat')}
         </button>
 
         <button
           className="ml-2 flex gap-3 p-3 items-center rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white cursor-pointer text-sm flex-shrink-0 border border-white/20"
-          onClick={() => onCreateFolder("New folder")}
+          onClick={() => onCreateFolder(t("New folder"))}
         >
           <IconFolderPlus size={16} />
         </button>
@@ -139,7 +142,7 @@ export const Sidebar: FC<Props> = ({ loading, conversations, lightMode, selected
           >
             <Conversations
               loading={loading}
-              conversations={filteredConversations.filter((conversation) => conversation.folderId === 0)}
+              conversations={filteredConversations.filter((conversation) => conversation.folderId === 0 || !folders[conversation.folderId - 1])}
               selectedConversation={selectedConversation}
               onSelectConversation={onSelectConversation}
               onDeleteConversation={handleDeleteConversation}
@@ -148,7 +151,7 @@ export const Sidebar: FC<Props> = ({ loading, conversations, lightMode, selected
           </div>
         ) : (
           <div className="mt-4 text-white text-center">
-            <div>No conversations.</div>
+            <div>{t('No conversations.')}</div>
           </div>
         )}
       </div>

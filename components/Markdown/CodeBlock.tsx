@@ -1,6 +1,7 @@
 import { generateRandomString, programmingLanguages } from "@/utils/app/codeblock";
-import { IconDownload } from "@tabler/icons-react";
+import { IconCheck, IconClipboard, IconDownload } from "@tabler/icons-react";
 import { FC, useState } from "react";
+import { useTranslation } from "next-i18next";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
@@ -11,7 +12,8 @@ interface Props {
 }
 
 export const CodeBlock: FC<Props> = ({ language, value, lightMode }) => {
-  const [buttonText, setButtonText] = useState("Copy code");
+  const { t } = useTranslation('markdown');
+  const [isCopied, setIsCopied] = useState<Boolean>(false);
 
   const copyToClipboard = () => {
     if (!navigator.clipboard || !navigator.clipboard.writeText) {
@@ -19,17 +21,17 @@ export const CodeBlock: FC<Props> = ({ language, value, lightMode }) => {
     }
 
     navigator.clipboard.writeText(value).then(() => {
-      setButtonText("Copied!");
+      setIsCopied(true);
 
       setTimeout(() => {
-        setButtonText("Copy code");
+        setIsCopied(false);
       }, 2000);
     });
   };
   const downloadAsFile = () => {
     const fileExtension = programmingLanguages[language] || ".file";
     const suggestedFileName = `file-${generateRandomString(3, true)}${fileExtension}`;
-    const fileName = window.prompt("Enter file name", suggestedFileName);
+    const fileName = window.prompt(t("Enter file name") || '', suggestedFileName);
 
     if (!fileName) {
       // user pressed cancel on prompt
@@ -48,21 +50,22 @@ export const CodeBlock: FC<Props> = ({ language, value, lightMode }) => {
     URL.revokeObjectURL(url);
   };
   return (
-    <div className="relative text-[16px]">
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-white">{language}</span>
+    <div className="codeblock relative text-[16px] font-sans">
+      <div className="flex items-center justify-between py-1.5 px-4">
+        <span className="text-xs text-white lowercase">{language}</span>
         <div className="flex items-center">
           <button
-            className="text-white bg-none py-0.5 px-2 rounded focus:outline-none hover:bg-blue-700 text-xs"
+            className="text-white bg-none py-0.5 px-2 rounded focus:outline-none text-xs flex items-center"
             onClick={copyToClipboard}
           >
-            {buttonText}
+            {isCopied ? <IconCheck size={18} className="mr-1.5"/> : <IconClipboard size={18} className="mr-1.5"/>}
+            {isCopied ? t("Copied!") : t("Copy code")}
           </button>
           <button
-            className="text-white bg-none py-0.5 px-2 rounded focus:outline-none hover:bg-blue-700 text-xs"
+            className="text-white bg-none py-0.5 pl-2 rounded focus:outline-none text-xs flex items-center"
             onClick={downloadAsFile}
           >
-            <IconDownload size={16} />
+            <IconDownload size={18} />
           </button>
         </div>
       </div>
@@ -70,6 +73,7 @@ export const CodeBlock: FC<Props> = ({ language, value, lightMode }) => {
       <SyntaxHighlighter
         language={language}
         style={lightMode === "light" ? oneLight : oneDark}
+        customStyle={{margin: 0}}
       >
         {value}
       </SyntaxHighlighter>

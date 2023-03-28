@@ -13,7 +13,8 @@ FORMATTERS_DISABLE_ERRORS: false
 VALIDATE_ALL_CODEBASE: true
 PRE_COMMANDS:
   - command: |
-      npm install prettier-plugin-tailwindcss \
+      npm install next \
+                  prettier-plugin-tailwindcss \
                   eslint-config-next \
                   eslint-config-prettier \
                   eslint-plugin-prettier \

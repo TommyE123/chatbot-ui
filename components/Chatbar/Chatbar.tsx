@@ -118,7 +118,7 @@ export const Chatbar: FC<Props> = ({
 
   return (
     <div
-      className={`fixed top-0 bottom-0 z-50 flex h-full w-[260px] flex-none flex-col space-y-2 bg-[#202123] p-2 transition-all sm:relative sm:top-0`}
+      className={`fixed bottom-0 top-0 z-50 flex h-full w-[260px] flex-none flex-col space-y-2 bg-[#202123] p-2 transition-all sm:relative sm:top-0`}
     >
       <div className="flex items-center">
         <button
@@ -194,9 +194,9 @@ export const Chatbar: FC<Props> = ({
             />
           </div>
         ) : (
-          <div className="flex flex-col gap-3 items-center text-sm leading-normal mt-8 text-white opacity-50">
+          <div className="mt-8 flex flex-col items-center gap-3 text-sm leading-normal text-white opacity-50">
             <IconMessagesOff />
-              {t('No conversations.')}
+            {t('No conversations.')}
           </div>
         )}
       </div>

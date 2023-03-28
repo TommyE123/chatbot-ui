@@ -1,38 +1,39 @@
 module.exports = {
   env: {
     browser: true,
-    es6: true,
+    es2021: true,
     node: true,
-    'jest/globals': true,
+    next: true,
   },
   extends: [
     'next',
+    'next/core-web-vitals',
     'eslint:recommended',
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:next/core-web-vitals'
+    'prettier/@typescript-eslint',
+    'prettier/react',
+    'prettier',
+    'eslint-config-tailwindcss',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
-      jsx: true
+      jsx: true,
     },
-    ecmaVersion: 2020,
-    sourceType: 'module'
+    ecmaVersion: 12,
+    sourceType: 'module',
   },
-  plugins: [
-    'react',
-    '@typescript-eslint',
-    'next'
-  ],
+  plugins: ['react', '@typescript-eslint', 'prettier'],
   rules: {
     'react/prop-types': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off'
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    'prettier/prettier': 'error',
   },
   settings: {
     react: {
-      version: 'detect'
-    }
-  }
-}
+      version: 'detect',
+    },
+  },
+};

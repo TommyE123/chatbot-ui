@@ -4,6 +4,7 @@
 DISABLE:
   - COPYPASTE
   - SPELL
+  - REPOSITORY
 
 SHOW_ELAPSED_TIME: true
 IGNORE_GENERATED_FILES: true
@@ -11,4 +12,9 @@ PRINT_ALL_FILES: false
 FORMATTERS_DISABLE_ERRORS: false
 VALIDATE_ALL_CODEBASE: true
 PRE_COMMANDS:
-  - command: npm install prettier-plugin-tailwindcss eslint-config-next
+  - command: |
+      npm install prettier-plugin-tailwindcss \
+                  eslint-config-next \
+                  eslint-config-prettier \
+                  eslint-plugin-prettier \
+                  eslint-config-tailwindcss

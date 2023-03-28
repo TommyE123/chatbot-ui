@@ -60,11 +60,14 @@ Fork Chatbot UI on Replit [here](https://replit.com/@MckayWrigley/chatbot-ui-pro
 **Docker**
 
 Build locally:
+
 ```shell
 docker build -t chatgpt-ui .
 docker run -e OPENAI_API_KEY=xxxxxxxx -p 3000:3000 chatgpt-ui
 ```
+
 Pull from ghcr:
+
 ```
 docker run -e OPENAI_API_KEY=xxxxxxxx -p 3000:3000 ghcr.io/mckaywrigley/chatbot-ui:main
 ```

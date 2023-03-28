@@ -10,10 +10,11 @@ module.exports = {
     'eslint:recommended',
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
+    'prettier',
     'prettier/@typescript-eslint',
     'prettier/react',
-    'prettier',
     'eslint-config-tailwindcss',
+    'eslint-config-prettier',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {

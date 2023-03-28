@@ -17,4 +17,4 @@ PRE_COMMANDS:
                   eslint-config-next \
                   eslint-config-prettier \
                   eslint-plugin-prettier \
-                  eslint-config-tailwindcss
+                  eslint-plugin-tailwindcss

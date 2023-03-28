@@ -3,7 +3,6 @@ module.exports = {
     browser: true,
     es2021: true,
     node: true,
-    next: true,
   },
   extends: [
     'next/core-web-vitals',

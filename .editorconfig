@@ -1,0 +1,36 @@
+root = true
+
+# All Files
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+end_of_line = crlf
+
+# Web Files
+[*.tsx]
+indent_size = 2
+
+# Web Files
+[*.{css,js,ts,json}]
+indent_size = 2
+insert_final_newline = false
+
+# TOML Files
+[*.toml]
+indent_style = tab
+
+# YAML Files
+[*.{yml,yaml}]
+indent_size = 2
+end_of_line = lf
+
+# Makefiles
+[Makefile]
+indent_style = tab
+
+# Misc Files
+[*.{dockerignore,editorconfig,gitignore}]
+insert_final_newline = false

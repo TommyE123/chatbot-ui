@@ -9,19 +9,11 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 end_of_line = crlf
 
-# Web Files
-[*.js]
-insert_final_newline = false
-
 # YAML Files
 [*.{yml,yaml}]
 end_of_line = lf
 
-# Misc Files
-[*.gitignore]
-indent_size = 4
-
 # Makefiles
 [Makefile]
 indent_style = tab
-end_of_line = lf
+indent_size = 4

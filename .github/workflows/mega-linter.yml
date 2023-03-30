@@ -31,6 +31,11 @@ jobs:
           token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
           # fetch-depth: 0 # If you use VALIDATE_ALL_CODEBASE = true, you can remove this line to improve performances
 
+      - name: Print Github Event and Ref
+        run: |
+          echo "Github Event: ${{ github.event_name }}"
+          echo "Github Ref: ${{ github.ref }}"
+
       # MegaLinter
       - name: MegaLinter
         id: ml

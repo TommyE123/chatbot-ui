@@ -30,6 +30,4 @@ PRE_COMMANDS:
                   eslint-config-next \
                   eslint-config-prettier \
                   eslint-plugin-prettier \
-                  eslint-plugin-tailwindcss \
-                  @tailwindcss/typography \
-                  stylelint-config-prettier
+                  @tailwindcss/typography

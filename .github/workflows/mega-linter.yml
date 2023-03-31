@@ -29,6 +29,7 @@ jobs:
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Ref: ${{ github.ref }}"
+          echo "Event Properties: ${{ toJson(github.event) }}"
           echo "Fetch Path: ${{ github.event.pull_request != null && github.event.pull_request == true && 0 || 1 }}"
 
       # Git Checkout

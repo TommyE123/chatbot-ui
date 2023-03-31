@@ -24,23 +24,18 @@ jobs:
     name: MegaLinter
     runs-on: ubuntu-latest
     steps:
-      - name: Check if PR exists
-        if: github.event_name == 'push' && contains(github.event.head_ref, 'refs/pull')
-        run: exit 1
-
       - name: Print Github Event and Ref
         run: |
-          echo "Github Event: ${{ github.event_name }}"
-          echo "github.event.head_ref: ${{ github.event.head_ref }}"
-          echo "Github Ref: ${{ github.ref }}"
-          echo "Fetch Path: ${{ github.event_name == 'pull_request' && 0 || 1 }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Fetch Path: ${{ if github.event.pull_request }} 0 ${else} 1 ${endif}}
 
       # Git Checkout
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
-          fetch-depth: ${{ github.event_name == 'pull_request' && 0 || 1 }}
+          fetch-depth: ${{ if github.event.pull_request }} 0 ${else} 1 ${endif}}
 
       # MegaLinter
       - name: MegaLinter
@@ -50,7 +45,7 @@ jobs:
         # cupcake is the recommended flavour based on current files in the repository
         uses: oxsecurity/megalinter/flavors/cupcake@v6
         env:
-          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'pull_request' }} # Validates all source when its a PR, else just the git diff with main.
+          VALIDATE_ALL_CODEBASE: ${{ github.event.pull_request }} # Validates all source when its a PR, else just the git diff with main.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Upload MegaLinter artifacts

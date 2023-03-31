@@ -29,14 +29,14 @@ jobs:
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Ref: ${{ github.ref }}"
-          echo "Fetch Path: ${{ github.event.pull_request == true && 0 || 1 }}"
+          echo "Fetch Path: ${{ github.event.pull_request != null && github.event.pull_request == true && 0 || 1 }}"
 
       # Git Checkout
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
-          fetch-depth: ${{ github.event.pull_request == true && 0 || 1 }}
+          fetch-depth: ${{ github.event.pull_request != null && github.event.pull_request == true && 0 || 1 }}
 
       # MegaLinter
       - name: MegaLinter
@@ -46,7 +46,7 @@ jobs:
         # cupcake is the recommended flavour based on current files in the repository
         uses: oxsecurity/megalinter/flavors/cupcake@v6
         env:
-          VALIDATE_ALL_CODEBASE: ${{ github.event.pull_request }} # Validates all source when its a PR, else just the git diff with main.
+          VALIDATE_ALL_CODEBASE: ${{ github.event.pull_request != null && github.event.pull_request == true }} # Validates all source when its a PR, else just the git diff with main.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Upload MegaLinter artifacts

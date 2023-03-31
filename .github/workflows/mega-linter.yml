@@ -24,18 +24,19 @@ jobs:
     name: MegaLinter
     runs-on: ubuntu-latest
     steps:
+      # Print Github Event and Ref
       - name: Print Github Event and Ref
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Ref: ${{ github.ref }}"
-          echo "Fetch Path: ${{ if github.event.pull_request }} 0 ${else} 1 ${endif}}
+          echo "Fetch Path: ${{ github.event.pull_request == true && 0 || 1 }}"
 
       # Git Checkout
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
-          fetch-depth: ${{ if github.event.pull_request }} 0 ${else} 1 ${endif}}
+          fetch-depth: ${{ github.event.pull_request == true && 0 || 1 }}
 
       # MegaLinter
       - name: MegaLinter

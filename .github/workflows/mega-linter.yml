@@ -39,6 +39,7 @@ jobs:
           echo "Event: ${{ github.event_name }}"
           echo "Ref: ${{ github.ref }}"
           echo "Fetch Path: ${{ steps.fetchDepth.outputs.value }}"
+          echo "${{ github.event_name == 'pull_request' && '0' || '1' }}"
 
       # Git Checkout
       - name: Checkout Code

@@ -29,6 +29,5 @@ PRE_COMMANDS:
                   prettier-plugin-tailwindcss \
                   eslint-config-next \
                   eslint-config-prettier \
-                  eslint-plugin-prettier \
                   eslint-plugin-tailwindcss \
                   @tailwindcss/typography

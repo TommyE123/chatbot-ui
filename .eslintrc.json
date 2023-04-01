@@ -9,9 +9,5 @@
     "prettier",
     "prettier/react",
     "prettier/@typescript-eslint"
-  ],
-  "plugins": ["prettier"],
-  "rules": {
-    "prettier/prettier": "error"
-  }
+  ]
 }

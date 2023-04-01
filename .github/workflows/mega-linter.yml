@@ -24,7 +24,6 @@ jobs:
     name: MegaLinter
     runs-on: ubuntu-latest
     steps:
-
       # Git Checkout
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -39,6 +38,7 @@ jobs:
         uses: oxsecurity/megalinter/flavors/cupcake@v6
         env:
           VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'pull_request' }} # Validates all source when its a PR, else just the git diff with main.
+          PAT: ${{ secrets.PAT }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Upload MegaLinter artifacts
